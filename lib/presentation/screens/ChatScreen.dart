@@ -90,7 +90,7 @@ class ChatScreenState extends State<ChatScreen> {
                           Expanded(
                             child: TextField(
                               controller: messageController,
-                              style: TextStyle(color: Colors.green),
+                              style: TextStyle(color: Colors.green[900]),
                               decoration: InputDecoration(
                                 hintText: 'Write a message...',
                                 border: InputBorder.none,

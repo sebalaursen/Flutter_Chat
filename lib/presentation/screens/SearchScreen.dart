@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:chat/bloc/UsersBloc.dart';
+import 'package:chat/bloc/UsersEvents.dart';
 import 'package:chat/models/User.dart';
 import 'package:chat/presentation/screens/ChatScreen.dart';
 import 'package:chat/presentation/widgets/SearchUserCell.dart';
@@ -10,6 +12,11 @@ import 'package:flutter/material.dart';
 import 'package:chat/presentation/widgets/TopBar.dart';
 
 class SearchScreen extends StatefulWidget {
+
+  final User me;
+
+  SearchScreen({ Key key, this.me }) : super(key: key);
+
   @override
   SearchScreenState createState() => SearchScreenState();
 }
@@ -19,16 +26,14 @@ class SearchScreenState extends State<SearchScreen> {
   TextEditingController searchController = TextEditingController();
   UserService userService = UserService();
 
+  final _bloc = UsersBloc();
   var isNavigating = false;
-  var users = [];
 
   _search(String query) async {
     Timer(Duration(milliseconds: 500), () async {
       if (query == this.searchController.text) {
-        final newUsers = await userService.searchByUsername(query);
-        setState(() {
-          users = newUsers;
-        });
+        print('go search');
+        _bloc.usersEventSink.add(SearchEvent(query, widget.me.username));
       }
     });
   }
@@ -44,14 +49,20 @@ class SearchScreenState extends State<SearchScreen> {
   }
 
   Widget _searchList() {
-    return users.isNotEmpty ? ListView.builder(
-      scrollDirection: Axis.vertical,
-      shrinkWrap: true,
-      itemCount: users.length,
-      itemBuilder: (context, index) {
-        return SearchUserCell(user: users[index], onMessage: startChat);
+    return StreamBuilder<List<User>>(
+      stream: _bloc.users,
+      initialData: [],
+      builder: (context, AsyncSnapshot<List<User>> snapshot) {
+        return ListView.builder(
+          scrollDirection: Axis.vertical,
+          shrinkWrap: true,
+          itemCount: snapshot.data.length,
+          itemBuilder: (context, index) {
+            return SearchUserCell(user: snapshot.data[index], onMessage: startChat);
+          }
+        );
       }
-    ) : Container();
+    );
   }
 
   @override
@@ -88,5 +99,11 @@ class SearchScreenState extends State<SearchScreen> {
         ),
       )
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _bloc.dispose();
   }
 }

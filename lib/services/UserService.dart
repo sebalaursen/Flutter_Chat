@@ -4,12 +4,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserService {
 
-  Future<List<dynamic>> searchByUsername(String query) async {
+  Future<List<User>> searchByUsername(String query) async {
     final res = await Firestore.instance.collection('Users')
       .where('Username', isEqualTo: query)
       .getDocuments();
 
-    var list = [];
+    List<User> list = [];
     res.documents.forEach((element) {
       list.add(User(element.data['Username'], element.documentID, element.data['Email']));
     });

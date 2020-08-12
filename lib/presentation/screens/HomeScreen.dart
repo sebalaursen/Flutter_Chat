@@ -44,21 +44,21 @@ class HomeScreenState extends State<HomeScreen> {
   }
 
   _search() {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => SearchScreen()));
+    Navigator.push(context, MaterialPageRoute(builder: (context) => SearchScreen(me: widget.me)));
   }
 
   Widget _chatsList() {
     return StreamBuilder(
       stream: chatsStream,
       builder: (context, snapshot) {
-        if (snapshot?.data?.documents != null) {
+        if (snapshot?.data?.documents != null && snapshot?.data != null) {
           final documents = snapshot?.data?.documents;
           return ListView.builder(
             itemCount: documents.length,
             itemBuilder:  (context, index) {
               final List<dynamic> users = documents[index]?.data['users'];
               final user = users.where((element) => element != widget.me.username);
-              return ChatCell(user: user.first, chatId: documents[index]?.data['chatId'], onChat: _chat);
+              return ChatCell(user: user?.first, chatId: documents[index]?.data['chatId'], onChat: _chat);
             },
           );
         } else {
